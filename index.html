@@ -43,14 +43,15 @@
                 <label class="form-label" for="productDescription">Product Description</label>
                 <textarea class="form-control" id="productDescription"></textarea>
             </div>
-            <button type="button" class="btn btn-outline-success" id="insertProduct" onclick="addProduct()">Add Product</button>
+            <button type="button" class="btn btn-outline-success" id="insertProduct"
+                onclick="addProduct()">AddProduct</button>
 
             <button type="button" class="btn btn-outline-warning" onclick="clearForm()">Clear Form</button>
+
         </form>
 
-        <input onkeyup="search()" class="form-control w-50 mx-auto my-5" type="text" placeholder="Search products" name=""
-            id="searchInput">
-
+        <input onkeyup="search()" class="form-control w-50 mx-auto my-5" type="text" placeholder="Search products"
+            name="" id="searchInput">
 
         <div class="table-responsive">
             <table
@@ -72,7 +73,10 @@
         </div>
     </div>
 
-    <button type="button" onclick="clearAll();" class="btn btn-danger position-relative bottom-0 start-50 translate-middle-x">CLEAR ALL DATA</button>
+
+
+    <button type="button" onclick="clearAll();"
+        class="btn btn-danger position-relative bottom-0 start-50 translate-middle-x">CLEAR ALL DATA</button>
 
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>

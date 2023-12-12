@@ -38,11 +38,11 @@ function addProduct() {
         description: productDescriptionInput.value
     }
 
-    if (document.getElementById('insertProduct').innerHTML == "Add Product") {
+    if (document.getElementById('insertProduct').innerHTML == "AddProduct") {
         productsList.push(product);
     } else if (document.getElementById('insertProduct').innerHTML == "Update Product") {
         productsList.splice(productIndexGlobal, 1, product);
-        document.getElementById('insertProduct').innerHTML = 'Add Product';
+        document.getElementById('insertProduct').innerHTML = 'AddProduct';
         document.getElementById('insertProduct').classList.add('btn-outline-success');
         document.getElementById('insertProduct').classList.remove('btn-info');
     }
@@ -106,7 +106,7 @@ function search() {
             content += `
                         <tr>
                             <td>${i + 1}</td>
-                            <td>${productsList[i].name}</td>
+                            <td>${productsList[i].name.toLowerCase().replace(searchValue, `<span class="bg-dark text-warning">${searchValue}</span>`)}</td>
                             <td>${productsList[i].price}</td>
                             <td>${productsList[i].category}</td>
                             <td>${productsList[i].sale}</td>
@@ -144,7 +144,9 @@ function updateProduct(productIndex) {
     productCategoryInput.value = productsList[productIndex].category;
     productSaleInput.checked = productsList[productIndex].sale;
     productDescriptionInput.value = productsList[productIndex].description;
+
     productIndexGlobal = productIndex;
+
     document.getElementById('insertProduct').innerHTML = 'Update Product';
     document.getElementById('insertProduct').classList.remove('btn-outline-success');
     document.getElementById('insertProduct').classList.add('btn-info');
