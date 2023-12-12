@@ -64,16 +64,12 @@ function clearForm() {
 }
 
 function viewProducts() {
-    if (localStorage.getItem('products') == null || JSON.parse(localStorage.getItem('products'))[0] == undefined) {
-        document.getElementById('tableContent').innerHTML = `<tr>
-        <td colspan="8" class="fw-bold text-danger">No Products Found</td>
-    </tr>`
-    } else {
-        var content = ``;
 
-        for (var i = 0; i < productsList.length; i++) {
+    var content = ``;
 
-            content += `
+    for (var i = 0; i < productsList.length; i++) {
+
+        content += `
                         <tr>
                             <td>${i + 1}</td>
                             <td>${productsList[i].name}</td>
@@ -89,15 +85,19 @@ function viewProducts() {
                             </td>
                         </tr>
         `;
-        }
-
-        document.getElementById('tableContent').innerHTML = content;
     }
+
+    if (content == ``) {
+        content = `<tr>
+            <td colspan="8" class="fw-bold text-danger">No Products Found</td>
+        </tr>`;
+    }
+
+    document.getElementById('tableContent').innerHTML = content;
 }
 
 function search() {
     var searchValue = searchInput.value.toLowerCase();
-
 
     var content = ``;
 
@@ -121,13 +121,14 @@ function search() {
                         `;
         }
     }
+
     if (content == ``) {
         content = `<tr>
-        <td colspan="8" class="fw-bold text-danger">No Products Found</td>
+        <td colspan="8" class="fw-bold text-danger">No Products Found with search criteria</td>
     </tr>`;
     }
-    document.getElementById('tableContent').innerHTML = content;
 
+    document.getElementById('tableContent').innerHTML = content;
 
 }
 
@@ -151,6 +152,7 @@ function updateProduct(productIndex) {
 
 function clearAll() {
     localStorage.removeItem('products');
+    productsList = [];
     viewProducts();
 }
 
