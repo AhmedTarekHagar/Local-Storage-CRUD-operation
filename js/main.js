@@ -64,7 +64,7 @@ function clearForm() {
 }
 
 function viewProducts() {
-    if (localStorage.getItem('products') == null) {
+    if (localStorage.getItem('products') == null || JSON.parse(localStorage.getItem('products'))[0] == undefined) {
         document.getElementById('tableContent').innerHTML = `<tr>
         <td colspan="8" class="fw-bold text-danger">No Products Found</td>
     </tr>`
@@ -98,6 +98,7 @@ function viewProducts() {
 function search() {
     var searchValue = searchInput.value.toLowerCase();
 
+
     var content = ``;
 
     for (var i = 0; i < productsList.length; i++) {
@@ -120,8 +121,13 @@ function search() {
                         `;
         }
     }
-
+    if (content == ``) {
+        content = `<tr>
+        <td colspan="8" class="fw-bold text-danger">No Products Found</td>
+    </tr>`;
+    }
     document.getElementById('tableContent').innerHTML = content;
+
 
 }
 
@@ -148,4 +154,4 @@ function clearAll() {
     viewProducts();
 }
 
-
+console.log();
