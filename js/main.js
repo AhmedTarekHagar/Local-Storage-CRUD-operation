@@ -1,36 +1,47 @@
-/* pseudo code
------- html structure (check)
------- get values from html inputs into js vars (check)
------- create an object for each product (check)
------- add object to an array of objects (check)
------- loop on array to create an html element (row)  (check)
------- display the above html in index file (document) (check)
-*/
 
-/* issues
-********* no entries handling
-*/
+// inputs variables
+let productNameInput = document.getElementById('productName');
+let productPriceInput = document.getElementById('productPrice');
+let productCategoryInput = document.getElementById('productCategory');
+let productSaleInput = document.getElementById('productSale');
+let productDescriptionInput = document.getElementById('productDescription');
+let productsSearchInput = document.getElementById('productSearch');
 
-var productNameInput = document.getElementById('productName');
-var productPriceInput = document.getElementById('productPrice');
-var productCategoryInput = document.getElementById('productCategory');
-var productSaleInput = document.getElementById('productSale');
-var productDescriptionInput = document.getElementById('productDescription');
-var searchInput = document.getElementById('searchInput');
+// global variables
+let addOrUpdateProductButton = document.getElementById('addOrUpdateProductButton');
+let globalIndex;
+let productsList = [];
 
-var productIndexGlobal;
-
-var productsList = [];
-viewProducts();
+// regex variables
+let productNameRegex = /^[^*]{3,16}$/;
+let productPriceRegex = /^(1000000|[1-9]\d{3,5})$/;
+let productCategoryRegex = /^(?!selectCategory$).*/;
 
 if (localStorage.getItem('products') != null) {
     productsList = JSON.parse(localStorage.getItem('products'));
-    viewProducts();
 }
 
-function addProduct() {
+displayProducts();
 
-    var product = {
+function addOrUpdateProduct() {
+
+    let nameValidation = validateName();
+    let priceValidation = validatePrice();
+    let categoryValidation = validateCategory();
+
+    if (!nameValidation) {
+        return;
+    }
+
+    if (!priceValidation) {
+        return;
+    }
+
+    if (!categoryValidation) {
+        return;
+    }
+
+    let product = {
         name: productNameInput.value,
         price: productPriceInput.value,
         category: productCategoryInput.value,
@@ -38,124 +49,187 @@ function addProduct() {
         description: productDescriptionInput.value
     }
 
-    if (document.getElementById('insertProduct').innerHTML == "AddProduct") {
+    let operator = addOrUpdateProductButton.dataset.operator;
+
+    if (operator == 'add') {
         productsList.push(product);
-    } else if (document.getElementById('insertProduct').innerHTML == "Update Product") {
-        productsList.splice(productIndexGlobal, 1, product);
-        document.getElementById('insertProduct').innerHTML = 'AddProduct';
-        document.getElementById('insertProduct').classList.add('btn-outline-success');
-        document.getElementById('insertProduct').classList.remove('btn-info');
+    } else if (operator == 'update') {
+        productsList.splice(globalIndex, 1, product);
+        addOrUpdateProductButton.dataset.operator = 'add';
+        addOrUpdateProductButton.classList.replace('btn-outline-warning', 'btn-outline-info');
+        addOrUpdateProductButton.innerText = 'Add Product';
     }
 
     addToLocalStorage();
     clearForm();
-    viewProducts();
+    displayProducts();
 }
 
 function addToLocalStorage() {
     localStorage.setItem('products', JSON.stringify(productsList));
 }
 
+addOrUpdateProductButton.addEventListener('click', addOrUpdateProduct);
+
+function displayProducts() {
+    let content = ``;
+
+    productsList.forEach((product, index) => {
+        content += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${product.name}</td>
+                        <td>${product.price}</td>
+                        <td>${product.category}</td>
+                        <td>${product.sale ? 'yes' : 'No'}</td>
+                        <td>${product.description}</td>
+                        <td>
+                            <button onclick="updateProduct(${index})" class="btn btn-warning" type="button">
+                                <i class="fa-solid fa-pen-to-square me-2"></i><span>Update</span>
+                            </button>
+                        </td>
+                        <td>
+                            <button onclick="deleteProduct(${index})" class="btn btn-danger" type="button">
+                                <i class="fa-solid fa-trash me-2"></i><span>Delete</span>
+                            </button>
+                        </td>
+                    </tr>
+        `;
+    });
+
+    if (content == ``) {
+        content = `
+                    <tr>
+                        <td colspan="8" class="text-uppercase text-danger fw-bold fs-3">no products found</td>
+                    </tr>
+        `;
+    }
+
+    document.getElementById('tableContent').innerHTML = content;
+}
+
 function clearForm() {
     productNameInput.value = ``;
     productPriceInput.value = ``;
+    productCategoryInput.value = `selectCategory`;
     productSaleInput.checked = false;
     productDescriptionInput.value = ``;
 }
 
-function viewProducts() {
+document.getElementById('clearFormButton').addEventListener('click', clearForm);
 
-    var content = ``;
+function deleteProduct(index) {
+    productsList.splice(index, 1);
+    addToLocalStorage();
+    displayProducts();
+}
 
-    for (var i = 0; i < productsList.length; i++) {
+function updateProduct(index) {
+    globalIndex = index;
+    let productToUpdate = productsList[index];
 
-        content += `
-                        <tr>
-                            <td>${i + 1}</td>
-                            <td>${productsList[i].name}</td>
-                            <td>${productsList[i].price}</td>
-                            <td>${productsList[i].category}</td>
-                            <td>${productsList[i].sale}</td>
-                            <td>${productsList[i].description}</td>
-                            <td>
-                                <button onclick="updateProduct(${i})" class="btn btn-warning">Update</button>
-                            </td>
-                            <td>
-                                <button onclick="deleteProduct(${i})" class="btn btn-danger">Delete</button>
-                            </td>
-                        </tr>
+    productNameInput.value = productToUpdate.name;
+    productPriceInput.value = productToUpdate.price;
+    productCategoryInput.value = productToUpdate.category;
+    productSaleInput.checked = productToUpdate.sale;
+    productDescriptionInput.value = productToUpdate.description;
+
+    addOrUpdateProductButton.dataset.operator = 'update';
+    addOrUpdateProductButton.classList.replace('btn-outline-info', 'btn-outline-warning');
+    addOrUpdateProductButton.innerText = 'Confirm changes';
+}
+
+document.getElementById('productSearch').addEventListener('keyup', searchProducts);
+
+function searchProducts() {
+    let searchValue = productsSearchInput.value.toLowerCase();
+
+    let content = ``;
+    productsList.forEach((product, index) => {
+        if (product.name.toLowerCase().includes(searchValue)) {
+            content += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${product.name.toLowerCase().replace(searchValue, `<span class="rounded mx-1 bg-warning text-dark">${searchValue}</span>`)}</td>
+                        <td>${product.price}</td>
+                        <td>${product.category}</td>
+                        <td>${product.sale ? 'yes' : 'No'}</td>
+                        <td>${product.description}</td>
+                        <td>
+                            <button onclick="updateProduct(${index})" class="btn btn-warning" type="button">
+                                <i class="fa-solid fa-pen-to-square me-2"></i><span>Update</span>
+                            </button>
+                        </td>
+                        <td>
+                            <button onclick="deleteProduct(${index})" class="btn btn-danger" type="button">
+                                <i class="fa-solid fa-trash me-2"></i><span>Delete</span>
+                            </button>
+                        </td>
+                    </tr>
+                    `;
+        }
+    });
+
+    if (content == ``) {
+        content = `
+                    <tr>
+                        <td colspan="8" class="text-uppercase text-danger fw-bold fs-3 text-uppercase text-danger fs-1">no matches</td>
+                    </tr>
         `;
     }
 
-    if (content == ``) {
-        content = `<tr>
-            <td colspan="8" class="fw-bold text-danger">No Products Found</td>
-        </tr>`;
-    }
-
     document.getElementById('tableContent').innerHTML = content;
 }
 
-function search() {
-    var searchValue = searchInput.value.toLowerCase();
+// validation 
+function regexCheck(regex, input) {
+    return regex.test(input);
+}
 
-    var content = ``;
+productNameInput.addEventListener('input', validateName);
 
-    for (var i = 0; i < productsList.length; i++) {
-        if (productsList[i].name.toLowerCase().includes(searchValue)) {
-            content += `
-                        <tr>
-                            <td>${i + 1}</td>
-                            <td>${productsList[i].name.toLowerCase().replace(searchValue, `<span class="bg-dark text-warning">${searchValue}</span>`)}</td>
-                            <td>${productsList[i].price}</td>
-                            <td>${productsList[i].category}</td>
-                            <td>${productsList[i].sale}</td>
-                            <td>${productsList[i].description}</td>
-                            <td>
-                                <button onclick="updateProduct(${i})" class="btn btn-warning">Update</button>
-                            </td>
-                            <td>
-                                <button onclick="deleteProduct(${i})" class="btn btn-danger">Delete</button>
-                            </td>
-                        </tr>
-                        `;
-        }
+function validateName() {
+    if (regexCheck(productNameRegex, productNameInput.value)) {
+        productNameInput.classList.add('is-valid');
+        productNameInput.classList.remove('is-invalid');
+        document.getElementById('nameAlert').classList.add('d-none');
+        return true;
+    } else {
+        productNameInput.classList.add('is-invalid');
+        productNameInput.classList.remove('is-valid');
+        document.getElementById('nameAlert').classList.remove('d-none');
+        return false;
     }
+}
 
-    if (content == ``) {
-        content = `<tr>
-        <td colspan="8" class="fw-bold text-danger">No Products Found with search criteria</td>
-    </tr>`;
+productPriceInput.addEventListener('input', validatePrice);
+
+function validatePrice() {
+    if (regexCheck(productPriceRegex, productPriceInput.value)) {
+        productPriceInput.classList.add('is-valid');
+        productPriceInput.classList.remove('is-invalid');
+        document.getElementById('priceAlert').classList.add('d-none');
+        return true;
+    } else {
+        productPriceInput.classList.remove('is-valid');
+        productPriceInput.classList.add('is-invalid');
+        document.getElementById('priceAlert').classList.remove('d-none');
+        return false;
     }
-
-    document.getElementById('tableContent').innerHTML = content;
-
 }
 
-function deleteProduct(productIndex) {
-    productsList.splice(productIndex, 1);
-    addToLocalStorage();
-    viewProducts();
+productCategoryInput.addEventListener('change', validateCategory)
+
+function validateCategory() {
+    if (productCategoryInput.value == 'selectCategory') {
+        document.getElementById('categoryAlert').classList.remove('d-none');
+        productCategoryInput.classList.add('is-invalid');
+        productCategoryInput.classList.remove('is-valid');
+        return false;
+    } else {
+        document.getElementById('categoryAlert').classList.add('d-none');
+        productCategoryInput.classList.remove('is-invalid');
+        productCategoryInput.classList.add('is-valid');
+        return true;
+    }
 }
-
-function updateProduct(productIndex) {
-    productNameInput.value = productsList[productIndex].name;
-    productPriceInput.value = productsList[productIndex].price;
-    productCategoryInput.value = productsList[productIndex].category;
-    productSaleInput.checked = productsList[productIndex].sale;
-    productDescriptionInput.value = productsList[productIndex].description;
-
-    productIndexGlobal = productIndex;
-
-    document.getElementById('insertProduct').innerHTML = 'Update Product';
-    document.getElementById('insertProduct').classList.remove('btn-outline-success');
-    document.getElementById('insertProduct').classList.add('btn-info');
-}
-
-function clearAll() {
-    localStorage.removeItem('products');
-    productsList = [];
-    viewProducts();
-}
-
-console.log();

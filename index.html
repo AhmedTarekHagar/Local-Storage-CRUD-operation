@@ -2,83 +2,90 @@
 <html lang="en">
 
 <head>
-    <link rel="shortcut icon" href="images/local-storage.png" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local Storage CRUD operation</title>
+    <title>Crud Operation with local storage</title>
+    <link rel="shortcut icon" href="images/local-storage.png" type="image/x-icon">
     <link rel="stylesheet" href="css/all.min.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body>
+<body class="bg-dark px-2">
 
-    <div class="container py-5">
-        <h2 class="mb-3 text-center border bg-body-secondary form-control fs-2 fw-bold">Products List</h2>
-        <form>
-            <div class="mb-3">
-                <label class="form-label" for="productName">Product Name</label>
-                <input type="text" id="productName" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label" for="productPrice">Product Price</label>
-                <input type="number" id="productPrice" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label" for="productCategory">Product Category</label>
-                <select class="form-select" id="productCategory">
-                    <option value="tv">TV</option>
-                    <option value="mobile">Mobile</option>
-                    <option value="laptop">Laptop</option>
-                    <option value="watches">Watches</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="productSale">
-                    <label class="form-check-label" for="productSale">Product Sale</label>
+    <div class="col-md-9 mx-auto mt-3">
+        <h1 class="form-control fs-1 fw-bold border border-dark text-center bg-secondary text-info">Products</h1>
+
+        <form id="productForm">
+            <div class="row g-3 my-3 px-3">
+                <div>
+                    <label class="form-label text-info" for="productName">Product Name</label>
+                    <input class="form-control focus-ring focus-ring-warning" type="text" id="productName">
+                    <div id="nameAlert" class="alert alert-warning text-danger mt-2 d-none" role="alert">
+                        Enter a valid name (3 to 16 letter and you cannot use the * character)
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label text-info" for="productPrice">Product Price</label>
+                    <input class="form-control focus-ring focus-ring-warning" type="number" id="productPrice">
+                    <div id="priceAlert" class="alert alert-warning text-danger mt-2 d-none" role="alert">
+                        Enter a valid price (between 1,000 and 1,000,000)
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label text-info" for="productCategory">Product Category</label>
+                    <select class="form-select focus-ring focus-ring-warning w-auto" id="productCategory">
+                        <option disabled selected value="selectCategory">Select Category</option>
+                        <option value="Mobile">Mobile</option>
+                        <option value="TV">TV</option>
+                    </select>
+                    <div id="categoryAlert" class="alert alert-warning text-danger mt-2 d-none" role="alert">
+                        Category is required!
+                    </div>
+                </div>
+                <div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input focus-ring focus-ring-warning" type="checkbox" role="switch" id="productSale">
+                        <label class="form-check-label text-info" for="productSale">Sale?</label>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label text-info" for="productDescription">Add description</label>
+                    <textarea class="form-control focus-ring focus-ring-warning" id="productDescription" cols="30" rows="5"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <button id="addOrUpdateProductButton" data-operator="add" class="btn btn-outline-info"
+                        type="button">Add Product</button>
+                    <button id="clearFormButton" class="btn btn-dark border-light" type="button">Clear Form</button>
                 </div>
             </div>
-            <div class="mb-3">
-                <label class="form-label" for="productDescription">Product Description</label>
-                <textarea class="form-control" id="productDescription"></textarea>
-            </div>
-            <button type="button" class="btn btn-outline-success" id="insertProduct"
-                onclick="addProduct()">AddProduct</button>
-
-            <button type="button" class="btn btn-outline-warning" onclick="clearForm()">Clear Form</button>
-
         </form>
 
-        <input onkeyup="search()" class="form-control w-50 mx-auto my-5" type="text" placeholder="Search products"
-            name="" id="searchInput">
-
-        <div class="table-responsive">
-            <table
-                class="table text-center table-info table-striped table-hover table-bordered border-info align-middle rounded-3 overflow-hidden border">
-                <thead class="align-middle">
-                    <th>Product Index</th>
-                    <th>Product Name</th>
-                    <th>Product Price</th>
-                    <th>Product Category</th>
-                    <th>Product Sale</th>
-                    <th>Product Description</th>
-                    <th>Update</th>
-                    <th>Delete</th>
+        <input class="form-control w-25 focus-ring focus-ring-danger mx-auto" placeholder="Search Products" type="text" id="productSearch">
+        <div class="table-responsive px-3 mt-5">
+            <table class="table table-hover table-dark table-striped text-center align-middle">
+                <thead>
+                    <tr class="align-middle">
+                        <th>Index</th>
+                        <th>Product Name</th>
+                        <th>Product Price</th>
+                        <th>Product Category</th>
+                        <th>Product Sale</th>
+                        <th>Product Description</th>
+                        <th>Update Product</th>
+                        <th>Delete Product</th>
+                    </tr>
                 </thead>
                 <tbody id="tableContent">
 
                 </tbody>
             </table>
         </div>
+
     </div>
 
-
-
-    <button type="button" onclick="clearAll();"
-        class="btn btn-danger position-relative bottom-0 start-50 translate-middle-x">CLEAR ALL DATA</button>
-
-    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/bootstrap.bundle.js"></script>
     <script src="js/main.js"></script>
 </body>
 
